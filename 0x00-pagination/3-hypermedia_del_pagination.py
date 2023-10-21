@@ -30,42 +30,38 @@ class Server:
                 i: dataset[i] for i in range(len(dataset))
             }
         return self.__indexed_dataset
-
+    
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        assert (index is None or (isinstance(index, int)
-                and index >= 0)), "AssertionError raised when out of range"
-        assert (isinstance(page_size, int)
-                and page_size > 0), "AssertionError raised when out of range"
+        """
+            Get the hyper index
+        """
+        result_dataset = []
+        index_data = self.indexed_dataset()
+        keys_list = list(index_data.keys())
+        assert index + page_size < len(keys_list)
+        assert index < len(keys_list)
 
-        dataset = self.indexed_dataset()
+        if index not in index_data:
+            start_index = keys_list[index]
+        else:
+            start_index = index
 
-        if index is None:
-            index = 0
+        for i in range(start_index, start_index + page_size):
+            if i not in index_data:
+                result_dataset.append(index_data[keys_list[i]])
+            else:
+                result_dataset.append(index_data[i])
 
-        current_index = index
-        next_index = current_index + page_size
-        data = []
+        next_index: int = index + page_size
 
-        while current_index in dataset and len(data) < page_size:
-            data.append(dataset[current_index])
-            current_index += 1
-
-        # Calculate the number of items in the dataset
-        num_items = len(dataset)
-
-        # Print the information
-        print(f"AssertionError raised when out of range")
-        print(f"Nb items: {num_items}")
-        print({
-            "index": index,
-            "data": data,
-            "page_size": page_size,
-            "next_index": next_index
-        })
+        if index in keys_list:
+            next_index
+        else:
+            next_index = keys_list[next_index]
 
         return {
-            "index": index,
-            "data": data,
-            "page_size": page_size,
-            "next_index": next_index
+            'index': index,
+            'next_index': next_index,
+            'page_size': len(result_dataset),
+            'data': result_dataset
         }
