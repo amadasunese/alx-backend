@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
- Deletion-resilient hypermedia pagination
+Deletion-resilient hypermedia pagination
 """
+
 import csv
 import math
 from typing import List, Dict
@@ -20,6 +21,7 @@ class Server:
                 reader = csv.reader(f)
                 dataset = [row for row in reader]
             self.__dataset = dataset[1:]
+
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
@@ -33,7 +35,7 @@ class Server:
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
         """
-            Get the hyper index
+         Hyper index
         """
         result_dataset = []
         index_data = self.indexed_dataset()
