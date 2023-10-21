@@ -7,15 +7,6 @@ import math
 from typing import List
 
 
-def index_range(page, page_size):
-    """
-    Invalid input, return an empty range
-    """
-
-    start_index = page * page_size
-    end_index = start_index - page_size
-    return (end_index, start_index)
-
 class Server:
     """Server class to paginate a database of popular baby names.
     """
@@ -36,4 +27,14 @@ class Server:
         return self.__dataset
 
     def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
-            pass
+        pass
+
+
+def index_range(page, page_size):
+    """
+    Invalid input, return an empty range
+    """
+
+    start_index = page * page_size
+    end_index = start_index - page_size
+    return (end_index, start_index)
