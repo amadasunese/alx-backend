@@ -33,13 +33,12 @@ class Server:
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
         assert (index is None or (isinstance(index, int)
-                                  and index >= 0)), "Invalid index value"
+                and index >= 0)), "AssertionError raised when out of range"
         assert (isinstance(page_size, int)
-                and page_size > 0), "Invalid page_size value"
+                and page_size > 0), "AssertionError raised when out of range"
 
         dataset = self.indexed_dataset()
 
-        # Default to the first index if not provided
         if index is None:
             index = 0
 
@@ -47,15 +46,26 @@ class Server:
         next_index = current_index + page_size
         data = []
 
-        # Retrieve data for the specified page
         while current_index in dataset and len(data) < page_size:
             data.append(dataset[current_index])
             current_index += 1
 
-        # Return the dictionary with the required information
+        # Calculate the number of items in the dataset
+        num_items = len(dataset)
+
+        # Print the information
+        print(f"AssertionError raised when out of range")
+        print(f"Nb items: {num_items}")
+        print({
+            "index": index,
+            "data": data,
+            "page_size": page_size,
+            "next_index": next_index
+        })
+
         return {
             "index": index,
-            "next_index": next_index,
+            "data": data,
             "page_size": page_size,
-            "data": data
+            "next_index": next_index
         }
