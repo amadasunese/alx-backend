@@ -32,13 +32,16 @@ class Server:
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        assert index is None or (isinstance(index, int) and index >= 0), "Invalid index value"
-        assert isinstance(page_size, int) and page_size > 0, "Invalid page_size value"
+        assert (index is None or (isinstance(index, int)
+                                  and index >= 0)), "Invalid index value"
+        assert (isinstance(page_size, int)
+                and page_size > 0), "Invalid page_size value"
 
         dataset = self.indexed_dataset()
 
+        # Default to the first index if not provided
         if index is None:
-            index = 0  # Default to the first index if not provided
+            index = 0
 
         current_index = index
         next_index = current_index + page_size
