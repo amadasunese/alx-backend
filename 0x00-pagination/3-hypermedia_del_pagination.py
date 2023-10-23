@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""
- Deletion-resilient hypermedia pagination
-"""
+"""Deletion-resilient hypermedia pagination of HATEOAS"""
 import csv
-import math
 from typing import List, Dict
 
 
 class Server:
+    """Server class to paginate a database of popular baby names."""
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
@@ -15,6 +13,7 @@ class Server:
         self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
+        """Cached dataset"""
         if self.__dataset is None:
             with open(self.DATA_FILE) as f:
                 reader = csv.reader(f)
@@ -23,45 +22,71 @@ class Server:
         return self.__dataset
 
     def indexed_dataset(self) -> Dict[int, List]:
+        """Dataset indexed by sorting position, starting at 0"""
         if self.__indexed_dataset is None:
             dataset = self.dataset()
-            truncated_dataset = dataset[:1000]
+            # truncated_dataset = dataset[:1000]
             self.__indexed_dataset = {
                 i: dataset[i] for i in range(len(dataset))
             }
         return self.__indexed_dataset
 
     def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        """
-            Get the hyper index
-        """
-        result_dataset = []
-        index_data = self.indexed_dataset()
-        keys_list = list(index_data.keys())
-        assert index + page_size < len(keys_list)
-        assert index < len(keys_list)
-
-        if index not in index_data:
-            start_index = keys_list[index]
+        """Paginates the dataset and accounts for deletions on page switch"""
+        if index is not None:
+            assert isinstance(index, int) and len(self.dataset()) > index >= 1
         else:
-            start_index = index
+            index = 0
+        assert isinstance(page_size, int) and page_size >= 1
 
-        for i in range(start_index, start_index + page_size):
-            if i not in index_data:
-                result_dataset.append(index_data[keys_list[i]])
-            else:
-                result_dataset.append(index_data[i])
+        total = len(self.indexed_dataset().keys())
+        last_key = sorted(self.indexed_dataset().keys())[-1]
+        i, data = index, []
 
-        next_index: int = index + page_size
-
-        if index in keys_list:
-            next_index
-        else:
-            next_index = keys_list[next_index]
-
+        # Skip over deleted keys
+        while i < last_key and len(data) < page_size:
+            val = self.indexed_dataset().get(i)
+            if val:
+                data.append(val)
+            i += 1
         return {
             'index': index,
-            'next_index': next_index,
-            'page_size': len(result_dataset),
-            'data': result_dataset
+            'next_index': i if total >= i else None,
+            'page_size': len(data),
+            'data': data
         }
+
+
+if __name__ == '__main__':
+    """Tests the code in this module"""
+    server = Server()
+
+    server.indexed_dataset()
+
+    try:
+        server.get_hyper_index(300000, 100)
+    except AssertionError:
+        print("AssertionError raised when out of range")
+
+    index = 3
+    page_size = 2
+
+    print("Number of items: {}".format(len(server._Server__indexed_dataset)))
+    print('\nindex = 3, page_size = 2 -> server.get_hyper_index(3, 2)')
+
+    print('\n1. Request first index')
+    res = server.get_hyper_index(index, page_size)
+    print(res)
+
+    print('\n2. Request next index')
+    print(server.get_hyper_index(res.get('next_index'), page_size))
+
+    print('\n3. Remove the first index -> ', end='')
+    del server._Server__indexed_dataset[res.get('index')]
+    print("Number of items: {}".format(len(server._Server__indexed_dataset)))
+
+    print('\n4. Redo 1. -> First item in data should have changed')
+    print(server.get_hyper_index(index, page_size))
+
+    print('\n5. Redo 2. -> Data should be identical')
+    print(server.get_hyper_index(res.get('next_index'), page_size))
