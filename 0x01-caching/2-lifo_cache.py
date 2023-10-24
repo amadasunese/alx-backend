@@ -4,13 +4,13 @@ from base_caching import BaseCaching
 
 
 class LIFOCache(BaseCaching):
-    """ Class that inherits from BaseCaching and is a caching system """
+    """ LIFO Caching """
     def __init__(self):
         super().__init__()
         self.last_key = ''
 
     def put(self, key, item):
-        """ Assign to the dictionary, LIFO algorithm, add element """
+        """ LIFO Caching """
         if key and item:
             self.cache_data[key] = item
             if len(self.cache_data) > BaseCaching.MAX_ITEMS:
@@ -19,7 +19,7 @@ class LIFOCache(BaseCaching):
             self.last_key = key
 
     def get(self, key):
-        """ Return the value linked """
+        """ LIFO Caching """
         if key is None or self.cache_data.get(key) is None:
             return None
         if key in self.cache_data:
