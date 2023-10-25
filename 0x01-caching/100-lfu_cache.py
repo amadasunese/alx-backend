@@ -1,68 +1,49 @@
 #!/usr/bin/python3
-"""LFU Caching"""
+""" LFU Caching """
 from base_caching import BaseCaching
 from collections import OrderedDict
 
 
 class LFUCache(BaseCaching):
-    """
-    A class that inherits from BaseCaching and implements LFU caching.
-    """
-
+    """ Class that inherits from BaseCaching and is a caching system """
     def __init__(self):
         super().__init__()
-        self.least_recently_used_cache = OrderedDict()
-        self.least_frequently_used_cache = {}
+        self.lru_cache = OrderedDict()
+        self.lfu_cache = {}
 
     def put(self, key, item):
-        """
-        Add a key-value pair to the cache.
-        """
-        if key is None or item is None:
-            return
-
-        self._remove_if_needed()
-        self._add_to_cache(key, item)
+        """ Assign to the dictionary, LFU algorithm """
+        if key in self.lru_cache:
+            del self.lru_cache[key]
+        if len(self.lru_cache) > BaseCaching.MAX_ITEMS - 1:
+            min_value = min(self.lfu_cache.values())
+            lfu_keys = [k for k, v in self.lfu_cache.items() if v == min_value]
+            if len(lfu_keys) == 1:
+                print("DISCARD:", lfu_keys[0])
+                self.lru_cache.pop(lfu_keys[0])
+                del self.lfu_cache[lfu_keys[0]]
+            else:
+                for k, _ in list(self.lru_cache.items()):
+                    if k in lfu_keys:
+                        print("DISCARD:", k)
+                        self.lru_cache.pop(k)
+                        del self.lfu_cache[k]
+                        break
+        self.lru_cache[key] = item
+        self.lru_cache.move_to_end(key)
+        if key in self.lfu_cache:
+            self.lfu_cache[key] += 1
+        else:
+            self.lfu_cache[key] = 1
+        self.cache_data = dict(self.lru_cache)
 
     def get(self, key):
-        """
-        Retrieve the value for a given key.
-        """
-        if key in self.least_recently_used_cache:
-            self.least_recently_used_cache.move_to_end(key)
-            self._increment_lfu_count(key)
-            return self.least_recently_used_cache[key]
-
-    def _remove_if_needed(self):
-        if len(self.least_recently_used_cache) > self.MAX_ITEMS - 1:
-            min_lfu_count = min(self.least_frequently_used_cache.values())
-            lfu_keys = [k for k, v in self.least_frequently_used_cache.items()
-                        if v == min_lfu_count]
-
-            discarded_key = next((k for k in self.least_recently_used_cache
-                                  if k in lfu_keys), lfu_keys[0])
-
-            self.least_recently_used_cache.pop(discarded_key)
-            del self.least_frequently_used_cache[discarded_key]
-            print("DISCARD:", discarded_key)
-
-    def _add_to_cache(self, key, item):
-        self.least_recently_used_cache[key] = item
-        self.least_recently_used_cache.move_to_end(key)
-        self._increment_lfu_count(key)
-
-    def _increment_lfu_count(self, key):
-        if key in self.least_frequently_used_cache:
-            self.least_frequently_used_cache[key] += 1
-        else:
-            self.least_frequently_used_cache[key] = 1
-
-
-if __name__ == '__main__':
-    # Sample usage
-    cache = LFUCache()
-    cache.put(1, "A")
-    cache.put(2, "B")
-    print(cache.get(1))  # Output: "A"
-    cache.put(3, "C")
-    print(cache.get(2))  # Output: "B"
+        """ Return the value linked """
+        if key in self.lru_cache:
+            value = self.lru_cache[key]
+            self.lru_cache.move_to_end(key)
+            if key in self.lfu_cache:
+                self.lfu_cache[key] += 1
+            else:
+                self.lfu_cache[key] = 1
+            return value
