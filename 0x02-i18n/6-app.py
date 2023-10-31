@@ -56,14 +56,24 @@ def get_user():
 
 @babel.localeselector
 def get_locale():
-    """
-    Check if locale argument
-    """
+    """Locale from URL parameters"""
     requested_locale = request.args.get('locale')
     if requested_locale in app.config['LANGUAGES']:
         return requested_locale
 
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    # Locale from user settings
+    if g.get('user'):
+        user_locale = g.user.get('locale')
+        if user_locale in app.config['LANGUAGES']:
+            return user_locale
+
+    # Locale from request header
+    best_match = request.accept_languages.best_match(app.config['LANGUAGES'])
+    if best_match:
+        return best_match
+
+    # Default locale
+    return app.config['BABEL_DEFAULT_LOCALE']
 
 
 @app.route('/', methods=['GET'], strict_slashes=False)
@@ -73,7 +83,7 @@ def hello_world():
         Return:
             Initial template html
     """
-    return render_template('5-index.html')
+    return render_template('6-index.html')
 
 
 if __name__ == "__main__":
