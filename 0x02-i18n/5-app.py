@@ -4,6 +4,8 @@ Get locale from request
 """
 from flask import Flask, render_template, request
 from flask_babel import Babel
+from typing import Union
+from flask import g
 
 
 users = {
@@ -32,29 +34,18 @@ app.config.from_object(Config)
 babel = Babel(app)
 
 
+def get_user():
+    user_id = request.args.get('login_as')
+    if user_id:
+        user = users.get(int(user_id))
+        if user:
+            return user
+    return None
+
+
 @app.before_request
-def before_request(login_as: int = None):
-    """ Request of each function
-    """
-    user: dict = get_user()
-    print(user)
-    g.user = user
-
-
-def get_user() -> Union[dict, None]:
-    """ Get the user of the dict
-
-        Return User
-    """
-    login_user = request.args.get('login_as', None)
-
-    if login_user is None:
-        return None
-
-    user: dict = {}
-    user[login_user] = users.get(int(login_user))
-
-    return user[login_user]
+def before_request():
+    g.user = get_user()
 
 
 @babel.localeselector
