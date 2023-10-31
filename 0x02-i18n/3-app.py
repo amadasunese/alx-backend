@@ -2,9 +2,13 @@
 """
 Parametrize templates
 """
-from flask_babel import _, gettext
+#!/usr/bin/env python3
+"""
+Get locale from request
+"""
 from flask import Flask, render_template, request
 from flask_babel import Babel
+from flask_babel import _, gettext
 
 
 app = Flask(__name__)
