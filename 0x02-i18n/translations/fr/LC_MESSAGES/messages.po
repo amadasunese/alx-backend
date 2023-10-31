@@ -2,7 +2,6 @@
 # Copyright (C) 2023 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
-#
 msgid "home_title"
 msgstr "Bienvenue chez Holberton"
 msgid "home_header"
